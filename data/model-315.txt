@@ -1,0 +1,13 @@
+    parsi_tstackh = 2;
+    parsi_tstacki = 2;
+    parsi_asymmetry = 2;
+    parsi_int11 = 2;
+    parsi_int21 = 2;
+    parsi_int22 = 2;
+    parsi_bulge1 = 2;   
+    parsi_dangles = 1;
+    parsi_length = 2;
+    parsi_special = 2;
+    use_similarity_rules = 0
+
+
