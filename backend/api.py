@@ -5,10 +5,6 @@ from NussinovAlgorithmWithTesting import *
 app = Flask(__name__)
 
 @app.route('/')
-def home():
-  return '<a href="/nussinov">/nussinov</a>'
-
-@app.route('/nussinov')
 def compute_nussinov():
   if 'rna' in request.args:
     rna_strand = request.args.get('rna')
