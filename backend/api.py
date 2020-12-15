@@ -23,4 +23,11 @@ def compute_nussinov():
     "pairings": pairings,
     "dashStructure": dash_structure,
   }
-  return json.dumps(result), 200, {'Content-Type':'application/json'}
+  
+  return json.dumps(result), 200, {
+    'Content-Type':'application/json',
+    'Access-Control-Allow-Credentials':'true',
+    'Access-Control-Allow-Origin':'*',
+    'Access-Control-Allow-Methods':'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+    'Access-Control-Allow-Headers':'*'
+  }
