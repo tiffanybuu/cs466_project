@@ -1,6 +1,6 @@
 const API = 'https://nussinov-api.vercel.app';
 
-type NussinovData = {
+export type NussinovData = {
   dpTable: number[][],
   maxScore: number,
   pairings: [number, number][], // array of tuples containing 2 numbers

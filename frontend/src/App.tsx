@@ -1,18 +1,15 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import { Button, Form, Segment, Table } from 'semantic-ui-react'
-import {nussinov} from './api'
+import { nussinov, NussinovData } from './api'
+import { traceback, Step } from './traceback';
 import './App.css';
 
 function App() {
-  type NussinovData = {
-    dpTable: number[][],
-    maxScore: number,
-    pairings: [number, number][], // array of tuples containing 2 numbers
-    dashStructure: string,
-  }
   const [rnaStrand, setRnaStrand] = useState("")
   const [minLoopParam, setMinLoopParam] = useState(0)
-  const [nussinovData, setNussinovData] = useState<NussinovData>()
+  const [nussinovData, setNussinovData] = useState<NussinovData>();
+  const [steps, setSteps] = useState<Step[]>([]); // currently just a list of cell indices, but will eventually be animation steps
+
   const handleRnaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setRnaStrand(event.target.value)
   }
@@ -20,9 +17,16 @@ function App() {
     setMinLoopParam(parseInt(event.target.value))
   }
   const handleClick = async () => {
-    const response = await nussinov(rnaStrand, minLoopParam)
+    const response = await nussinov(rnaStrand, minLoopParam);
+    setSteps(traceback(rnaStrand, response.dpTable));
     setNussinovData(response)
   }
+
+  const cellsToHighlight = useMemo(() => {
+    const cells = steps.map(([i, j]) => `${i}-${j}`); // convert tuples to strings so that they're constants
+    return new Set(cells); // use Set to allow efficient existence check
+  }, [steps]);
+
   return (
     <div className="App">
       <h1 className="header">Interactive Nussinov Visualizer</h1>
@@ -57,13 +61,13 @@ function App() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {nussinovData && nussinovData.dpTable.map((row, idx) => 
+                {nussinovData && nussinovData.dpTable.map((row, i) => 
                     <Table.Row>
                       <Table.Cell>
-                        {idx}
+                        {i}
                       </Table.Cell>
-                      {row.map(score => 
-                        <Table.Cell>
+                      {row.map((score, j) => 
+                        <Table.Cell active={cellsToHighlight.has(`${i}-${j}`)}>
                           {score}
                         </Table.Cell>
                       )}
