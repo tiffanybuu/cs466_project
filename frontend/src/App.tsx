@@ -2,6 +2,8 @@ import React, {useState, useEffect, useMemo} from 'react';
 import { Button, Form, Segment, Table } from 'semantic-ui-react'
 import { nussinov, NussinovData } from './api'
 import { traceback, Step } from './traceback';
+// @ts-ignore
+import { Animated } from 'react-web-animation';
 import './App.css';
 
 function App() {
@@ -28,6 +30,23 @@ function App() {
     const cells = steps.map(([i, j]) => `${i}-${j}`); // convert tuples to strings so that they're constants
     return new Set(cells); // use Set to allow efficient existence check
   }, [steps]);
+
+  const keyFrames = useMemo(() => {
+    // const frames = 
+    // return steps.map(([i, j]) => (
+    //   { transform: `translate(calc(${j * 100}% + ${j}px), calc(${i * 100}% + ${j}px))` }
+    // ));
+    return [0, 1, 2, 3, 4].map(x => ([
+      { transform: `translateX(calc(${x * 100}% + ${1.39*x}px))`, offset: .2 * x },
+      { transform: `translateX(calc(${x * 100}% + ${1.39*x}px))`, offset: .2 * x + .1},
+    ])).flat();
+  }, [steps]);
+
+  const timing = {
+    duration: steps.length * 1000,
+    // direction: 'alternate',
+    iterations: Infinity,
+  };
 
   return (
     <div className="App">
@@ -70,8 +89,18 @@ function App() {
                         {rnaCopy[i]}
                       </Table.Cell>
                       {row.map((score, j) => 
-                        <Table.Cell style={{ backgroundColor: cellsToHighlight.has(`${i}-${j}`) ? 'pink' : '' }}>
+                        <Table.Cell style={{ backgroundColor: cellsToHighlight.has(`${i}-${j}`) ? 'pink' : '', position: 'relative'}}>
                           {score}
+                          {i == 0 && j == 0 && (
+                            // <div style={{ backgroundColor: 'rgba(255, 0, 0, .5)', position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', transform: 'translateY(100%)', zIndex: 100 }}>
+                            //   {score}
+                            // </div>
+                            <Animated.div
+                              style={{ backgroundColor: 'rgba(255, 0, 0, .5)', position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', zIndex: 100 }}
+                              keyframes={keyFrames}
+                              timing={timing}
+                            />
+                          )}
                         </Table.Cell>
                       )}
                     </Table.Row>
