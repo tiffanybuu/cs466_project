@@ -70,7 +70,7 @@ function App() {
                         {rnaCopy[i]}
                       </Table.Cell>
                       {row.map((score, j) => 
-                        <Table.Cell active={cellsToHighlight.has(`${i}-${j}`)}>
+                        <Table.Cell style={{ backgroundColor: cellsToHighlight.has(`${i}-${j}`) ? 'pink' : '' }}>
                           {score}
                         </Table.Cell>
                       )}
