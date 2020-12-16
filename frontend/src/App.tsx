@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useMemo} from 'react';
-import { Button, Container, Divider, Form, Segment, Table } from 'semantic-ui-react'
+import { Button, Form, Table } from 'semantic-ui-react'
 import { nussinov, NussinovData } from './api'
 import { traceback, Step } from './traceback';
 import './App.css';
 
-const ANIMATION_STEP_DURATION = 1500;
+const ANIMATION_STEP_DURATION = 1250;
 const ANIMATION_TRANSITION_DURATION = 500;
 
 function App() {
@@ -13,10 +13,10 @@ function App() {
   const [nussinovData, setNussinovData] = useState<NussinovData>()
   const [rnaCopy, setRnaCopy] = useState("")
   const [steps, setSteps] = useState<Step[]>([]);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(-1); // -1 will cause entire backtrace to be displayed
 
-  // if this is not null, it means an animation is ongoing (not null even if it's paused)
   const [animationInterval, setAnimationInterval] = useState<number|null>(null);
+  const isAnimationPlaying = animationInterval !== null;
 
   const handleRnaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setRnaStrand(event.target.value)
@@ -31,23 +31,44 @@ function App() {
     setRnaCopy(rnaStrand)
   }
 
-  const handleStopAnimation = () => {
-    setAnimationInterval(interval => {
-      if (interval !== null) {
-        window.clearInterval(interval);
-      }
-      return null;
-    });
-    setCurrentStep(0);
-  }
-
-  const handleAnimate = () => {
-    if (animationInterval !== null) {
-      handleStopAnimation();
-    }
+  const handlePlayAnimation = () => {
     const interval = window.setInterval(() => setCurrentStep(step => step + 1), ANIMATION_STEP_DURATION);
     setAnimationInterval(interval);
-  };
+    setCurrentStep(step => step + 1);
+  }
+
+  const handlePauseAnimation = () => {
+    if (animationInterval !== null) {
+      window.clearInterval(animationInterval);
+      setAnimationInterval(null);
+    }
+  }
+
+  const handleStopAnimation = () => {
+    handlePauseAnimation();
+    setCurrentStep(-1);
+  }
+
+  // we want to ensure that the current step index is always between [-1, steps.length - 1]
+  // (-1 corresponds to displaying the entire backtrace)
+  const cycleCurrentStep = (step: number) => {
+    // we effectively want to cycle it in an array of size steps.length + 1, and then subtract 1
+    const n = steps.length + 1;
+    while (step + 1 < 0) {
+      step += n;
+    }
+    return (step + 1) % (steps.length + 1) - 1;
+  }
+
+  const handleStepForward = () => {
+    handlePauseAnimation();
+    setCurrentStep(step => cycleCurrentStep(step + 1));
+  }
+
+  const handleStepBackward = () => {
+    handlePauseAnimation();
+    setCurrentStep(step => cycleCurrentStep(step - 1));
+  }
 
   // check to see if the animation ended whenever the currentStep changes, and stop interval if so
   useEffect(() => {
@@ -66,13 +87,13 @@ function App() {
       transition: `background-color ${ANIMATION_TRANSITION_DURATION/1000}s`
     };
 
-    if (animationInterval == null) { // animation is not going on, so highlight all cells in traceback
-      if (cellsToHighlight.has(`${i}-${j}`)) {
+    if (steps[currentStep]) { // if the current step exists, display that step
+      const [row, column] = steps[currentStep];
+      if (row === i && column === j) {
         style.backgroundColor = 'pink';
       }
-    } else { // highlight only the cell in current animation step
-      const [row, column] = steps[currentStep] || [];
-      if (row === i && column === j) {
+    } else { // otherwise (i.e. if currentStep == -1), display the entire backtrace
+      if (cellsToHighlight.has(`${i}-${j}`)) {
         style.backgroundColor = 'pink';
       }
     }
@@ -135,11 +156,14 @@ function App() {
 
           <br />
           <Button.Group>
-            <Button icon="chevron left" title="Step Forward" />
+            <Button icon="chevron left" title="Step Backward" onClick={handleStepBackward} />
             <Button icon="stop" title="Stop Animation" onClick={handleStopAnimation} />
-            <Button icon="play" title="Play Animation" onClick={handleAnimate} />
-            <Button icon="pause" title="Pause Animation" />
-            <Button icon="chevron right" title="Step Backward" />
+            <Button
+              icon={isAnimationPlaying ? 'pause' : 'play'}
+              title={`${isAnimationPlaying ? 'Pause' : 'Play'} Animation`}
+              onClick={isAnimationPlaying ? handlePauseAnimation : handlePlayAnimation}
+            />
+            <Button icon="chevron right" title="Step Forward" onClick={handleStepForward} />
           </Button.Group>
           <br /><br />
         </>
