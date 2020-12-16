@@ -13,6 +13,7 @@ function App() {
   const [rnaStrand, setRnaStrand] = useState("")
   const [minLoopParam, setMinLoopParam] = useState(0)
   const [nussinovData, setNussinovData] = useState<NussinovData>()
+  const [rnaCopy, setRnaCopy] = useState("")
   const handleRnaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setRnaStrand(event.target.value)
   }
@@ -22,6 +23,7 @@ function App() {
   const handleClick = async () => {
     const response = await nussinov(rnaStrand, minLoopParam)
     setNussinovData(response)
+    setRnaCopy(rnaStrand)
   }
   return (
     <div className="App">
@@ -50,7 +52,7 @@ function App() {
                 </Table.Row>
                 <Table.Row>
                   <Table.HeaderCell />
-                  {nussinovData && rnaStrand.split("").map(x => 
+                  {nussinovData && rnaCopy.split("").map(x => 
                     <Table.HeaderCell>
                       {x}
                     </Table.HeaderCell>
@@ -61,7 +63,7 @@ function App() {
                 {nussinovData && nussinovData.dpTable.map((row, idx) => 
                     <Table.Row>
                       <Table.Cell>
-                        {rnaStrand[idx]}
+                        {rnaCopy[idx]}
                       </Table.Cell>
                       {row.map(score => 
                         <Table.Cell>
