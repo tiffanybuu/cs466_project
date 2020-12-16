@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import { Button, Form, Table } from 'semantic-ui-react'
 import { nussinov, NussinovData } from './api'
 import { traceback, Step } from './traceback';
@@ -31,51 +31,75 @@ function App() {
     setRnaCopy(rnaStrand)
   }
 
-  const handlePlayAnimation = () => {
+  const handlePlayAnimation = useCallback(() => {
     const interval = window.setInterval(() => setCurrentStep(step => step + 1), ANIMATION_STEP_DURATION);
     setAnimationInterval(interval);
     setCurrentStep(step => step + 1);
-  }
+  }, []);
 
-  const handlePauseAnimation = () => {
+  const handlePauseAnimation = useCallback(() => {
     if (animationInterval !== null) {
       window.clearInterval(animationInterval);
       setAnimationInterval(null);
     }
-  }
+  }, [animationInterval])
 
-  const handleStopAnimation = () => {
+  const handleStopAnimation = useCallback(() => {
     handlePauseAnimation();
     setCurrentStep(-1);
-  }
+  }, [handlePauseAnimation])
 
   // we want to ensure that the current step index is always between [-1, steps.length - 1]
   // (-1 corresponds to displaying the entire backtrace)
-  const cycleCurrentStep = (step: number) => {
+  const cycleCurrentStep = useCallback((step: number) => {
     // we effectively want to cycle it in an array of size steps.length + 1, and then subtract 1
     const n = steps.length + 1;
     while (step + 1 < 0) {
       step += n;
     }
     return (step + 1) % (steps.length + 1) - 1;
-  }
+  }, [steps.length])
 
-  const handleStepForward = () => {
+  const handleStepForward = useCallback(() => {
     handlePauseAnimation();
     setCurrentStep(step => cycleCurrentStep(step + 1));
-  }
+  }, [cycleCurrentStep, handlePauseAnimation])
 
-  const handleStepBackward = () => {
+  const handleStepBackward = useCallback(() => {
     handlePauseAnimation();
     setCurrentStep(step => cycleCurrentStep(step - 1));
-  }
+  }, [cycleCurrentStep, handlePauseAnimation]);
 
-  // check to see if the animation ended whenever the currentStep changes, and stop interval if so
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if (e.target === document.body) {
+        if (e.key === ' ') {
+          if (isAnimationPlaying) {
+            handlePauseAnimation();
+          } else {
+            handlePlayAnimation();
+          }
+        }
+        else if (e.key === 'ArrowRight') {
+          handleStepForward();
+        }
+        else if (e.key === 'ArrowLeft') {
+          handleStepBackward();
+        }
+      }
+    }
+    window.addEventListener('keydown', listener);
+    return () => {
+      window.removeEventListener('keydown', listener);
+    }
+  }, [handlePauseAnimation, handlePlayAnimation, handleStepBackward, handleStepForward, isAnimationPlaying]);
+
+  // once the animation completes a full run, stop the interval
   useEffect(() => {
     if (currentStep >= steps.length) {
       handleStopAnimation();
     }
-  }, [steps, currentStep]);
+  }, [steps, currentStep, handleStopAnimation]);
 
   const cellsToHighlight = useMemo(() => {
     const cells = steps.map(([i, j]) => `${i}-${j}`); // convert tuples to strings so that they're constants
@@ -156,14 +180,14 @@ function App() {
 
           <br />
           <Button.Group>
-            <Button icon="chevron left" title="Step Backward" onClick={handleStepBackward} />
+            <Button icon="chevron left" title="Step Backward (Left Arrow Key)" onClick={handleStepBackward} />
             <Button icon="stop" title="Stop Animation" onClick={handleStopAnimation} />
             <Button
               icon={isAnimationPlaying ? 'pause' : 'play'}
-              title={`${isAnimationPlaying ? 'Pause' : 'Play'} Animation`}
+              title={`${isAnimationPlaying ? 'Pause' : 'Play'} Animation (Space)`}
               onClick={isAnimationPlaying ? handlePauseAnimation : handlePlayAnimation}
             />
-            <Button icon="chevron right" title="Step Forward" onClick={handleStepForward} />
+            <Button icon="chevron right" title="Step Forward (Right Arrow Key)" onClick={handleStepForward} />
           </Button.Group>
           <br /><br />
         </>
