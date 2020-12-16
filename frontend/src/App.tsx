@@ -1,17 +1,22 @@
 import React, {useState, useEffect, useMemo} from 'react';
-import { Button, Form, Segment, Table } from 'semantic-ui-react'
+import { Button, Container, Divider, Form, Segment, Table } from 'semantic-ui-react'
 import { nussinov, NussinovData } from './api'
 import { traceback, Step } from './traceback';
-// @ts-ignore
-import { Animated } from 'react-web-animation';
 import './App.css';
+
+const ANIMATION_STEP_DURATION = 1500;
+const ANIMATION_TRANSITION_DURATION = 500;
 
 function App() {
   const [rnaStrand, setRnaStrand] = useState("")
   const [minLoopParam, setMinLoopParam] = useState(0)
   const [nussinovData, setNussinovData] = useState<NussinovData>()
   const [rnaCopy, setRnaCopy] = useState("")
-  const [steps, setSteps] = useState<Step[]>([]); // currently just a list of cell indices, but will eventually be animation steps
+  const [steps, setSteps] = useState<Step[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // if this is not null, it means an animation is ongoing (not null even if it's paused)
+  const [animationInterval, setAnimationInterval] = useState<number|null>(null);
 
   const handleRnaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setRnaStrand(event.target.value)
@@ -26,39 +31,70 @@ function App() {
     setRnaCopy(rnaStrand)
   }
 
+  const handleStopAnimation = () => {
+    setAnimationInterval(interval => {
+      if (interval !== null) {
+        window.clearInterval(interval);
+      }
+      return null;
+    });
+    setCurrentStep(0);
+  }
+
+  const handleAnimate = () => {
+    if (animationInterval !== null) {
+      handleStopAnimation();
+    }
+    const interval = window.setInterval(() => setCurrentStep(step => step + 1), ANIMATION_STEP_DURATION);
+    setAnimationInterval(interval);
+  };
+
+  // check to see if the animation ended whenever the currentStep changes, and stop interval if so
+  useEffect(() => {
+    if (currentStep >= steps.length) {
+      handleStopAnimation();
+    }
+  }, [steps, currentStep]);
+
   const cellsToHighlight = useMemo(() => {
     const cells = steps.map(([i, j]) => `${i}-${j}`); // convert tuples to strings so that they're constants
     return new Set(cells); // use Set to allow efficient existence check
   }, [steps]);
 
-  const keyFrames = useMemo(() => {
-    // const frames = 
-    // return steps.map(([i, j]) => (
-    //   { transform: `translate(calc(${j * 100}% + ${j}px), calc(${i * 100}% + ${j}px))` }
-    // ));
-    return [0, 1, 2, 3, 4].map(x => ([
-      { transform: `translateX(calc(${x * 100}% + ${1.39*x}px))`, offset: .2 * x },
-      { transform: `translateX(calc(${x * 100}% + ${1.39*x}px))`, offset: .2 * x + .1},
-    ])).flat();
-  }, [steps]);
+  const getTableCell = (score: number, i: number, j: number) => {
+    const style: React.CSSProperties = {
+      transition: `background-color ${ANIMATION_TRANSITION_DURATION/1000}s`
+    };
 
-  const timing = {
-    duration: steps.length * 1000,
-    // direction: 'alternate',
-    iterations: Infinity,
-  };
+    if (animationInterval == null) { // animation is not going on, so highlight all cells in traceback
+      if (cellsToHighlight.has(`${i}-${j}`)) {
+        style.backgroundColor = 'pink';
+      }
+    } else { // highlight only the cell in current animation step
+      const [row, column] = steps[currentStep] || [];
+      if (row === i && column === j) {
+        style.backgroundColor = 'pink';
+      }
+    }
+
+    return (
+      <Table.Cell style={style}>
+        {score}
+      </Table.Cell>
+    );
+  }
 
   return (
     <div className="App">
       <h1 className="header">Interactive Nussinov Visualizer</h1>
       <Form>
-        <Form.TextArea label='RNA Input Sequence' placeholder='Enter input sequence...' onChange={(event) => handleRnaChange(event)}/>
+        <Form.TextArea label='RNA Input Sequence' placeholder='Enter input sequence...' onChange={(event) => handleRnaChange(event)} />
         <br />
-        <Form.Input label="Minimum Length for Hairpin Loops" placeholder='Enter an integer...' onChange={(event) => handleLoopChange(event)}/>
+        <Form.Input label="Minimum Length for Hairpin Loops" placeholder='Enter an integer...' onChange={(event) => handleLoopChange(event)} />
         <br />
         <Button type='submit' onClick={handleClick}>Run Nussinov!</Button>
       </Form>
-      {nussinovData && 
+      {nussinovData &&
         <>
           <h4>Dash Structure: {nussinovData.dashStructure}</h4>
           <h4>Max # of Pairings: {nussinovData.maxScore}</h4>
@@ -75,7 +111,7 @@ function App() {
                 </Table.Row>
                 <Table.Row>
                   <Table.HeaderCell />
-                  {nussinovData && rnaCopy.split("").map(x => 
+                  {nussinovData && rnaCopy.split("").map(x =>
                     <Table.HeaderCell>
                       {x}
                     </Table.HeaderCell>
@@ -83,33 +119,32 @@ function App() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {nussinovData && nussinovData.dpTable.map((row, i) => 
-                    <Table.Row>
-                      <Table.Cell>
-                        {rnaCopy[i]}
-                      </Table.Cell>
-                      {row.map((score, j) => 
-                        <Table.Cell style={{ backgroundColor: cellsToHighlight.has(`${i}-${j}`) ? 'pink' : '', position: 'relative'}}>
-                          {score}
-                          {i == 0 && j == 0 && (
-                            // <div style={{ backgroundColor: 'rgba(255, 0, 0, .5)', position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', transform: 'translateY(100%)', zIndex: 100 }}>
-                            //   {score}
-                            // </div>
-                            <Animated.div
-                              style={{ backgroundColor: 'rgba(255, 0, 0, .5)', position: 'absolute', top: 0, left: 0, height: '100%', width: '100%', zIndex: 100 }}
-                              keyframes={keyFrames}
-                              timing={timing}
-                            />
-                          )}
-                        </Table.Cell>
-                      )}
-                    </Table.Row>
-                  )}
+                {nussinovData && nussinovData.dpTable.map((row, i) =>
+                  <Table.Row>
+                    <Table.Cell>
+                      {rnaCopy[i]}
+                    </Table.Cell>
+                    {row.map((score, j) =>
+                      getTableCell(score, i, j)
+                    )}
+                  </Table.Row>
+                )}
               </Table.Body>
-          </Table>
-        </div>
-        </>}
-      </div>
+            </Table>
+          </div>
+
+          <br />
+          <Button.Group>
+            <Button icon="chevron left" title="Step Forward" />
+            <Button icon="stop" title="Stop Animation" onClick={handleStopAnimation} />
+            <Button icon="play" title="Play Animation" onClick={handleAnimate} />
+            <Button icon="pause" title="Pause Animation" />
+            <Button icon="chevron right" title="Step Backward" />
+          </Button.Group>
+          <br /><br />
+        </>
+      }
+    </div>
   );
 }
 
