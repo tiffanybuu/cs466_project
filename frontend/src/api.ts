@@ -1,4 +1,5 @@
-const API = 'https://nussinov-api.vercel.app';
+// const API = 'https://nussinov-api.vercel.app';
+const API = 'http://127.0.0.1:5000';
 
 type NussinovData = {
   dpTable: number[][],
