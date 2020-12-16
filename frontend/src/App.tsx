@@ -35,7 +35,8 @@ function App() {
       </Form>
       {nussinovData && 
         <>
-          <h3>Dash Structure: {nussinovData.dashStructure}</h3>
+          <h4>Dash Structure: {nussinovData.dashStructure}</h4>
+          <h4>Max # of Pairings: {nussinovData.maxScore}</h4>
           <div className="dp-table">
             <Table compact celled definition>
               <Table.Header>
@@ -49,9 +50,9 @@ function App() {
                 </Table.Row>
                 <Table.Row>
                   <Table.HeaderCell />
-                  {nussinovData && nussinovData.dpTable[0].map((x, idx) => 
+                  {nussinovData && rnaStrand.split("").map(x => 
                     <Table.HeaderCell>
-                      {idx}
+                      {x}
                     </Table.HeaderCell>
                   )}
                 </Table.Row>
@@ -60,7 +61,7 @@ function App() {
                 {nussinovData && nussinovData.dpTable.map((row, idx) => 
                     <Table.Row>
                       <Table.Cell>
-                        {idx}
+                        {rnaStrand[idx]}
                       </Table.Cell>
                       {row.map(score => 
                         <Table.Cell>
