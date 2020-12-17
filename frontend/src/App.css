@@ -7,8 +7,34 @@
   margin-bottom: 3rem;
 }
 
+.slider {
+  overflow: hidden;
+}
+
+.slider-left {
+  float: left;
+}
+
+.slider-right {
+  float: right;
+}
+
+.loop-input {
+  overflow: hidden;
+}
+
+.loop-input-box {
+  width: 1rem;
+}
+
+p {
+  margin-bottom: 0.5rem;
+  font-size: 15px;
+}
+
 .dp-table {
   margin-top: 2rem;
-  width: 92vw;
+  margin-left: 2rem;
+  width: 73vw;
   overflow-x: scroll;
 }
