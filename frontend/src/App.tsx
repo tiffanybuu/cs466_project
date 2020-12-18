@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useMemo, useCallback} from 'react';
-import { Button, Dimmer, Form, Grid, Header, Icon, Input, Loader, Segment, Table } from 'semantic-ui-react'
+import { Button, Dimmer, Form, Grid, Header, Icon, Loader, Segment, Table } from 'semantic-ui-react'
 // @ts-ignore
 import { Slider } from "react-semantic-ui-range";
 import { nussinov, NussinovData } from './api'
@@ -154,48 +154,50 @@ function App() {
     <div className="App">
       <h1 className="header">Interactive Nussinov Visualizer</h1>
       <Grid>
-        <Grid.Column width={3}>
-          <Form>
-            <p><b>RNA Input Sequence</b></p>
-            <Form.TextArea placeholder='Enter input sequence...' value={rnaStrand} onChange={(event) => handleRnaChange(event)} />
-            <br />
-            <p><b>Minimum Hairpin Loop Length</b></p>
-            <Form.Input 
-              placeholder='Enter an integer or use slider below...'
-              onChange={(event) => handleLoopChange(event)}/>
-            <br />
-            <div className="loop-input">
-                <Slider value={minLoopParam} color="red" settings={sliderSettings} />
-                <p className="slider-left">0</p>
-                <p className="slider-right">30</p>
+          <Grid.Column width={3}>
+            <div className="sidebar">
+              <Form>
+                <p><b>RNA Input Sequence</b></p>
+                <Form.TextArea placeholder='Enter input sequence...' value={rnaStrand} onChange={(event) => handleRnaChange(event)} />
+                <br />
+                <p><b>Minimum Hairpin Loop Length</b></p>
+                <Form.Input 
+                  placeholder='Enter an integer or use slider below...'
+                  onChange={(event) => handleLoopChange(event)}/>
+                <br />
+                <div className="loop-input">
+                    <Slider value={minLoopParam} color="red" settings={sliderSettings} />
+                    <p className="slider-left">0</p>
+                    <p className="slider-right">30</p>
+                </div>
+                <p>{minLoopParam}</p>
+                <br />
+                <Button onClick={handleClick}>Run Nussinov!</Button>
+              </Form>
+              <br />
+              {nussinovData &&
+                <Segment>
+                  <p><b>Dash Structure:</b></p>
+                  <p>{nussinovData.dashStructure}</p>
+                  <br />
+                  <p><b>Max Pairings:</b></p>
+                  <p>{nussinovData.maxScore}</p>
+                  <br />
+                  <p><b>Play Animation</b></p>
+                  <Button.Group>
+                    <Button icon="chevron left" title="Step Backward (Left Arrow Key)" onClick={handleStepBackward} />
+                    <Button icon="stop" title="Stop Animation" onClick={handleStopAnimation} />
+                    <Button
+                      icon={isAnimationPlaying ? 'pause' : 'play'}
+                      title={`${isAnimationPlaying ? 'Pause' : 'Play'} Animation (Space)`}
+                      onClick={isAnimationPlaying ? handlePauseAnimation : handlePlayAnimation}
+                    />
+                    <Button icon="chevron right" title="Step Forward (Right Arrow Key)" onClick={handleStepForward} />
+                  </Button.Group>
+                </Segment>
+              }
             </div>
-            <p>{minLoopParam}</p>
-            <br />
-            <Button onClick={handleClick}>Run Nussinov!</Button>
-          </Form>
-          <br />
-          {nussinovData &&
-            <Segment>
-              <p><b>Dash Structure:</b></p>
-              <p>{nussinovData.dashStructure}</p>
-              <br />
-              <p><b>Max Pairings:</b></p>
-              <p>{nussinovData.maxScore}</p>
-              <br />
-              <p><b>Play Animation</b></p>
-              <Button.Group>
-                <Button icon="chevron left" title="Step Backward (Left Arrow Key)" onClick={handleStepBackward} />
-                <Button icon="stop" title="Stop Animation" onClick={handleStopAnimation} />
-                <Button
-                  icon={isAnimationPlaying ? 'pause' : 'play'}
-                  title={`${isAnimationPlaying ? 'Pause' : 'Play'} Animation (Space)`}
-                  onClick={isAnimationPlaying ? handlePauseAnimation : handlePlayAnimation}
-                />
-                <Button icon="chevron right" title="Step Forward (Right Arrow Key)" onClick={handleStepForward} />
-              </Button.Group>
-            </Segment>
-          }
-        </Grid.Column>
+          </Grid.Column>
         <Grid.Column width={13}>
           {nussinovData ?
           <>
