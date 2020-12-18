@@ -165,7 +165,7 @@ function App() {
                   placeholder='Enter an integer or use slider below...'
                   onChange={(event) => handleLoopChange(event)}/>
                 <br />
-                <div className="loop-input">
+                <div className="slider">
                     <Slider discrete value={minLoopParam} color="red" settings={sliderSettings} />
                     <p className="slider-left">0</p>
                     <p className="slider-right">30</p>
