@@ -46,9 +46,9 @@ function App() {
     }
     setMinLoopParam(value)
   }
-  const handleClick = () => {
+  const handleClick = async () => {
     setLoading(true)
-    calculateNussinov()
+    await calculateNussinov()
     setLoading(false)
   }
 
@@ -166,7 +166,7 @@ function App() {
                   onChange={(event) => handleLoopChange(event)}/>
                 <br />
                 <div className="loop-input">
-                    <Slider value={minLoopParam} color="red" settings={sliderSettings} />
+                    <Slider discrete value={minLoopParam} color="red" settings={sliderSettings} />
                     <p className="slider-left">0</p>
                     <p className="slider-right">30</p>
                 </div>
@@ -199,7 +199,7 @@ function App() {
             </div>
           </Grid.Column>
         <Grid.Column width={13}>
-          {nussinovData ?
+          {nussinovData && !loading ?
           <>
             <div className="dp-table">
               <Table compact celled definition>
