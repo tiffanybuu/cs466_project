@@ -123,24 +123,25 @@ function App() {
   }, [steps, currentStep, handleStopAnimation]);
 
   const cellsToHighlight = useMemo(() => {
-    const cells = steps.map(([i, j]) => `${i}-${j}`); // convert tuples to strings so that they're constants
-    return new Set(cells); // use Set to allow efficient existence check
-  }, [steps]);
+    const cells = new Set();
+    for (const [i, step] of steps.entries()) {
+      // if current step is -1, then we want to highlight all the cells, otherwise we just want the current step
+      if (currentStep === i || currentStep === -1) {
+        for (const cellKey of Object.keys(step)) {
+          cells.add(cellKey); // cellKey is of format `${row}-${column}`
+        }
+      }
+    }
+    return cells;
+  }, [steps, currentStep]);
 
   const getTableCell = (score: number, i: number, j: number) => {
     const style: React.CSSProperties = {
       transition: `background-color ${ANIMATION_TRANSITION_DURATION/1000}s`
     };
 
-    if (steps[currentStep]) { // if the current step exists, display that step
-      const [row, column] = steps[currentStep];
-      if (row === i && column === j) {
-        style.backgroundColor = 'pink';
-      }
-    } else { // otherwise (i.e. if currentStep == -1), display the entire backtrace
-      if (cellsToHighlight.has(`${i}-${j}`)) {
-        style.backgroundColor = 'pink';
-      }
+    if (cellsToHighlight.has(`${i}-${j}`)) {
+      style.backgroundColor = 'pink';
     }
 
     return (
