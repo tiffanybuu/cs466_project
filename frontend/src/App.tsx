@@ -159,7 +159,6 @@ function App() {
               <Form>
                 <p><b>RNA Input Sequence</b></p>
                 <Form.TextArea placeholder='Enter input sequence...' value={rnaStrand} onChange={(event) => handleRnaChange(event)} />
-                <br />
                 <p><b>Minimum Hairpin Loop Length</b></p>
                 <Form.Input 
                   placeholder='Enter an integer or use slider below...'
@@ -171,7 +170,6 @@ function App() {
                     <p className="slider-right">30</p>
                 </div>
                 <p>{minLoopParam}</p>
-                <br />
                 <Button onClick={handleClick}>Run Nussinov!</Button>
               </Form>
               <br />
@@ -179,10 +177,8 @@ function App() {
                 <Segment>
                   <p><b>Dash Structure:</b></p>
                   <p>{nussinovData.dashStructure}</p>
-                  <br />
                   <p><b>Max Pairings:</b></p>
                   <p>{nussinovData.maxScore}</p>
-                  <br />
                   <p><b>Play Animation</b></p>
                   <Button.Group>
                     <Button icon="chevron left" title="Step Backward (Left Arrow Key)" onClick={handleStepBackward} />
