@@ -34,7 +34,7 @@ export function traceback(rnaStrand: string, dpTable: number[][]) {
       stack.push([i + 1, j, color]);
     } else if (dpTable[i][j - 1] === dpTable[i][j]) { // j is unpaired
       stack.push([i, j - 1, color]);
-    } else if (dpTable[i + 1][j - 1] + 1 === dpTable[i][j] && getBasePairingScore(rnaStrand[i], rnaStrand[j]) == 1) {
+    } else if (dpTable[i + 1][j - 1] + 1 === dpTable[i][j] && getBasePairingScore(rnaStrand[i], rnaStrand[j]) === 1) {
       // pairedIndices.push([i, j]); // add to paired indices list
       stack.push([i + 1, j - 1, color]);
     } else {
