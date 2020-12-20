@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
-import { Button, Dimmer, Form, Grid, Header, Icon, Loader, Segment, Table } from 'semantic-ui-react'
+import React, {useState, useEffect, useMemo, useCallback, useRef} from 'react';
+import { Button, Dimmer, Form, Grid, Header, Icon, Loader, Ref, Segment, Table } from 'semantic-ui-react'
 // @ts-ignore
 import { Slider } from "react-semantic-ui-range";
 import distinctColors from 'distinct-colors';
@@ -32,19 +32,24 @@ function App() {
       setMinLoopParam(value)
     }
   }
-  const calculateNussinov = async () => {
-    const response = await nussinov(rnaStrand, minLoopParam);
-    setSteps(traceback(rnaStrand, response.dpTable));
-    setNussinovData(response)
-    setRnaCopy(rnaStrand)
-    setMinLoopParam(minLoopParam)
-  }
+  
   const [nussinovData, setNussinovData] = useState<NussinovData>()
   const [steps, setSteps] = useState<Step[]>([]);
   const [currentStep, setCurrentStep] = useState(-1); // -1 will cause entire backtrace to be displayed
 
   const [animationInterval, setAnimationInterval] = useState<number|null>(null);
   const isAnimationPlaying = animationInterval !== null;
+
+  const tableCells = useRef<HTMLElement[]>([]);
+
+  const calculateNussinov = async () => {
+    const response = await nussinov(rnaStrand, minLoopParam);
+    setSteps(traceback(rnaStrand, response.dpTable));
+    setNussinovData(response)
+    setRnaCopy(rnaStrand)
+    setMinLoopParam(minLoopParam)
+    tableCells.current = new Array(rnaStrand.length**2);
+  }
 
   const handleRnaChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setRnaStrand(event.target.value)
@@ -132,6 +137,20 @@ function App() {
     }
   }, [steps, currentStep, handleStopAnimation]);
 
+  // scroll current cell into view as animation plays (as currentStep is updated)
+  useEffect(() => {
+    const step = steps[currentStep];
+    if (step) {
+      const cells = Object.keys(step);
+      const [i, j] = cells[cells.length - 1].split('-').map(x => Number(x));
+      tableCells.current[i*rnaCopy.length + j]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center',
+      });
+    }
+  }, [steps, currentStep, rnaCopy]);
+
   const cellsToHighlight = useMemo(() => {
     const cells: { [cellKey: string]: number } = {}
     for (const [i, step] of steps.entries()) {
@@ -173,9 +192,11 @@ function App() {
     }
 
     return (
-      <Table.Cell style={style}>
-        {score}
-      </Table.Cell>
+      <Ref innerRef={(el: HTMLElement) => tableCells.current[i * rnaCopy.length + j] = el}>
+        <Table.Cell style={style}>
+          {score}
+        </Table.Cell>
+      </Ref>
     );
   }
 
@@ -191,6 +212,7 @@ function App() {
                 <p><b>Minimum Hairpin Loop Length</b></p>
                 <Form.Input 
                   placeholder='Enter an integer or use slider below...'
+                  value={minLoopParam}
                   onChange={(event) => handleLoopChange(event)}/>
                 <br />
                 <div className="slider">
