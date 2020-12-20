@@ -1,10 +1,11 @@
 .App {
   text-align: center;
-  margin: 2rem;
+  margin: 0 2rem;
 }
 
-.header {
-  margin-bottom: 1rem;
+.header:first-child { /* added the :first-child so this takes priority over semantic ui styles */
+  margin: 1.5rem 0;
+  flex: none !important; /* override semantic ui styles for children of stretched columns*/
 }
 
 .slider-left {
@@ -19,11 +20,41 @@ p {
   font-size: 15px;
 }
 
+.right-column {
+  flex: 1;
+  height: 100vh;
+}
+
 .dp-table {
   margin-left: 2rem;
   width: 75vw;
   overflow: auto;
   margin-top: 1rem;
+}
+
+.top-header-cell {
+  position: sticky;
+  top: 0;
+  left: 30px;
+  z-index: 1;
+}
+
+.top-header-cell.second-row {
+  top: 45px; /* hardcoded height of header row */
+}
+
+.top-header-cell:first-child {
+  /* override semantic ui so that sticky headers look better */
+  border: none !important;
+  background: white !important; 
+  left: 0;
+}
+
+.left-header-cell {
+  position: sticky;
+  left: 0;
+  background-color: #f7f7f7 !important; /* override semantic ui so that background isn't transparent */
+  top: 89px;
 }
 
 .sidebar {

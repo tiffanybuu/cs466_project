@@ -155,7 +155,7 @@ function App() {
     const cells: { [cellKey: string]: number } = {}
     for (const [i, step] of steps.entries()) {
       // if current step is -1, then we want to highlight all the cells, otherwise we just want the current step
-      if (currentStep === i || currentStep === -1) {
+      if (i <= currentStep || currentStep === -1) {
         for (const [cellKey, color] of Object.entries(step)) {
           // cellKey is of format `${row}-${column}`
           cells[cellKey] = color;
@@ -202,67 +202,69 @@ function App() {
 
   return (
     <div className="App">
-      <h1 className="header">Interactive Nussinov Visualizer</h1>
       <Grid>
-          <Grid.Column width={3}>
-            <div className="sidebar">
-              <Form>
-                <p><b>RNA Input Sequence</b></p>
-                <Form.TextArea placeholder='Enter input sequence...' value={rnaStrand} onChange={(event) => handleRnaChange(event)} />
-                <p><b>Minimum Hairpin Loop Length</b></p>
-                <Form.Input 
-                  placeholder='Enter an integer or use slider below...'
-                  value={minLoopParam}
-                  onChange={(event) => handleLoopChange(event)}/>
-                <br />
-                <div className="slider">
-                    <Slider discrete value={minLoopParam} color="red" settings={sliderSettings} />
-                    <p className="slider-left">0</p>
-                    <p className="slider-right">30</p>
-                </div>
-                <p>{minLoopParam}</p>
-                <Button onClick={handleClick}>Run Nussinov!</Button>
-              </Form>
+        <Grid.Column width={3}>
+          <div className="sidebar">
+            <Form>
+              <p><b>RNA Input Sequence</b></p>
+              <Form.TextArea placeholder='Enter input sequence...' value={rnaStrand} onChange={(event) => handleRnaChange(event)} />
+              <p><b>Minimum Hairpin Loop Length</b></p>
+              <Form.Input
+                placeholder='Enter an integer or use slider below...'
+                value={minLoopParam}
+                onChange={(event) => handleLoopChange(event)}/>
               <br />
-              {nussinovData &&
-                <Segment>
-                  <p><b>Dash Structure:</b></p>
-                  <p>{nussinovData.dashStructure}</p>
-                  <p><b>Max Pairings:</b></p>
-                  <p>{nussinovData.maxScore}</p>
-                  <p><b>Play Animation</b></p>
-                  <Button.Group>
-                    <Button icon="chevron left" title="Step Backward (Left Arrow Key)" onClick={handleStepBackward} />
-                    <Button icon="stop" title="Stop Animation" onClick={handleStopAnimation} />
-                    <Button
-                      icon={isAnimationPlaying ? 'pause' : 'play'}
-                      title={`${isAnimationPlaying ? 'Pause' : 'Play'} Animation (Space)`}
-                      onClick={isAnimationPlaying ? handlePauseAnimation : handlePlayAnimation}
-                    />
-                    <Button icon="chevron right" title="Step Forward (Right Arrow Key)" onClick={handleStepForward} />
-                  </Button.Group>
-                </Segment>
-              }
-            </div>
-          </Grid.Column>
-        <Grid.Column width={13}>
+              <div className="slider">
+                  <Slider discrete value={minLoopParam} color="red" settings={sliderSettings} />
+                  <p className="slider-left">0</p>
+                  <p className="slider-right">30</p>
+              </div>
+              <p>{minLoopParam}</p>
+              <Button onClick={handleClick}>Run Nussinov!</Button>
+            </Form>
+            <br />
+            {nussinovData &&
+              <Segment>
+                <p><b>Dash Structure:</b></p>
+                <p>{nussinovData.dashStructure}</p>
+                <p><b>Max Pairings:</b></p>
+                <p>{nussinovData.maxScore}</p>
+                <p><b>Play Animation</b></p>
+                <Button.Group>
+                  <Button icon="chevron left" title="Step Backward (Left Arrow Key)" onClick={handleStepBackward} />
+                  <Button icon="stop" title="Stop Animation" onClick={handleStopAnimation} />
+                  <Button
+                    icon={isAnimationPlaying ? 'pause' : 'play'}
+                    title={`${isAnimationPlaying ? 'Pause' : 'Play'} Animation (Space)`}
+                    onClick={isAnimationPlaying ? handlePauseAnimation : handlePlayAnimation}
+                  />
+                  <Button icon="chevron right" title="Step Forward (Right Arrow Key)" onClick={handleStepForward} />
+                </Button.Group>
+              </Segment>
+            }
+          </div>
+        </Grid.Column>
+
+        <Grid.Column width={13} className="right-column" stretched>
+          <h1 className="header">Interactive Nussinov Visualizer</h1>
+
           {nussinovData && !loading ?
           <>
             <div className="dp-table">
-              <Table compact celled definition>
+              <Table textAlign="center" compact celled definition>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell />
+                    <Table.HeaderCell className="top-header-cell" />
                     {nussinovData.dashStructure.split(" ").map(x => (
-                      <Table.HeaderCell>
+                      <Table.HeaderCell className="top-header-cell">
                         {x}
                       </Table.HeaderCell>
                     ))}
                   </Table.Row>
                   <Table.Row>
-                    <Table.HeaderCell />
+                    <Table.HeaderCell className="top-header-cell second-row" />
                     {rnaCopy.split("").map(x =>
-                      <Table.HeaderCell>
+                      <Table.HeaderCell className="top-header-cell second-row">
                         {x}
                       </Table.HeaderCell>
                     )}
@@ -271,7 +273,7 @@ function App() {
                 <Table.Body>
                   {nussinovData.dpTable.map((row, i) =>
                     <Table.Row>
-                      <Table.Cell>
+                      <Table.Cell className="left-header-cell">
                         {rnaCopy[i]}
                       </Table.Cell>
                       {row.map((score, j) =>
