@@ -42,6 +42,10 @@ p {
   top: 45px; /* hardcoded height of header row */
 }
 
+.top-header-cell:first-child {
+  background-color: white !important; /* override semantic ui so that sticky headers look better */
+}
+
 .left-header-cell {
   position: sticky;
   left: 0;

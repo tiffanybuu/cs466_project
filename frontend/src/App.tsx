@@ -254,7 +254,7 @@ function App() {
               <Table textAlign="center" compact celled definition>
                 <Table.Header>
                   <Table.Row>
-                    <Table.HeaderCell />
+                    <Table.HeaderCell className="top-header-cell" />
                     {nussinovData.dashStructure.split(" ").map(x => (
                       <Table.HeaderCell className="top-header-cell">
                         {x}
@@ -262,7 +262,7 @@ function App() {
                     ))}
                   </Table.Row>
                   <Table.Row>
-                    <Table.HeaderCell />
+                    <Table.HeaderCell className="top-header-cell second-row" />
                     {rnaCopy.split("").map(x =>
                       <Table.HeaderCell className="top-header-cell second-row">
                         {x}
