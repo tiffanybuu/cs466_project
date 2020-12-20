@@ -2,12 +2,22 @@ import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import { Button, Dimmer, Form, Grid, Header, Icon, Loader, Segment, Table } from 'semantic-ui-react'
 // @ts-ignore
 import { Slider } from "react-semantic-ui-range";
+import distinctColors from 'distinct-colors';
+
 import { nussinov, NussinovData } from './api'
 import { traceback, Step } from './traceback';
 import './App.css';
 
 const ANIMATION_STEP_DURATION = 1250;
 const ANIMATION_TRANSITION_DURATION = 500;
+
+function shuffle(arr: any[]) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 function App() {
   const [loading, setLoading] = useState(false)
@@ -123,25 +133,43 @@ function App() {
   }, [steps, currentStep, handleStopAnimation]);
 
   const cellsToHighlight = useMemo(() => {
-    const cells = new Set();
+    const cells: { [cellKey: string]: number } = {}
     for (const [i, step] of steps.entries()) {
       // if current step is -1, then we want to highlight all the cells, otherwise we just want the current step
       if (currentStep === i || currentStep === -1) {
-        for (const cellKey of Object.keys(step)) {
-          cells.add(cellKey); // cellKey is of format `${row}-${column}`
+        for (const [cellKey, color] of Object.entries(step)) {
+          // cellKey is of format `${row}-${column}`
+          cells[cellKey] = color;
         }
       }
     }
     return cells;
   }, [steps, currentStep]);
 
+  const colors = useMemo(() => {
+    let maxColorIndex = 0;
+    for (const step of steps) {
+      for (const colorIndex of Object.values(step)) {
+        maxColorIndex = Math.max(maxColorIndex, colorIndex);
+      }
+    }
+
+    return shuffle(distinctColors({
+      count: (maxColorIndex + 1) + 5,
+      lightMin: 40,
+      lightMax: 80,
+      chromaMin: 10,
+    }).map(color => color.hex()));
+  }, [steps]);
+
   const getTableCell = (score: number, i: number, j: number) => {
     const style: React.CSSProperties = {
       transition: `background-color ${ANIMATION_TRANSITION_DURATION/1000}s`
     };
 
-    if (cellsToHighlight.has(`${i}-${j}`)) {
-      style.backgroundColor = 'pink';
+    const colorIndex = cellsToHighlight[`${i}-${j}`];
+    if (colorIndex !== undefined) {
+      style.backgroundColor = colors[colorIndex];
     }
 
     return (

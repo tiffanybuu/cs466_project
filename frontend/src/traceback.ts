@@ -22,7 +22,8 @@ export function traceback(rnaStrand: string, dpTable: number[][]) {
   // const pairedIndices = [] // list containing which indices i, j in rna_strand are paired
   const steps: Step[] = [];
   const stack: Cell[] = [];
-  stack.push([0, n - 1, 0]) // (0, n - 1) instead of (1, n) to stay within index bounds
+  let currentColor = 0;
+  stack.push([0, n - 1, currentColor]) // (0, n - 1) instead of (1, n) to stay within index bounds
   steps.push(stackToStep(stack));
 
   while (stack.length > 0) {
@@ -39,8 +40,8 @@ export function traceback(rnaStrand: string, dpTable: number[][]) {
     } else {
       for (let k = i + 1; k < j; k++) {
         if (dpTable[i][k] + dpTable[k + 1][j] === dpTable[i][j]) { // bifurcation
-          stack.push([k + 1, j, color + 1]);
-          stack.push([i, k, color + 2]);
+          stack.push([k + 1, j, ++currentColor]);
+          stack.push([i, k, ++currentColor]);
           break;
         }
       }
