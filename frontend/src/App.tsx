@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useMemo, useCallback, useRef} from 'react';
-import { Button, Dimmer, Form, Grid, Header, Icon, Loader, Ref, Segment, Table } from 'semantic-ui-react'
+import { Button, Dimmer, Form, Grid, Header, Icon, Loader, Modal, Ref, Segment, Table } from 'semantic-ui-react'
 // @ts-ignore
 import { Slider } from "react-semantic-ui-range";
 import distinctColors from 'distinct-colors';
@@ -20,6 +20,7 @@ function shuffle(arr: any[]) {
 }
 
 function App() {
+  const [modalOpen, setModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [rnaStrand, setRnaStrand] = useState("")
   const [rnaCopy, setRnaCopy] = useState("")
@@ -202,6 +203,7 @@ function App() {
 
   return (
     <div className="App">
+      <h1 className="header">Interactive Nussinov Visualizer</h1>
       <Grid>
         <Grid.Column width={3}>
           <div className="sidebar">
@@ -225,8 +227,21 @@ function App() {
             <br />
             {nussinovData &&
               <Segment>
-                <p><b>Dash Structure:</b></p>
-                <p>{nussinovData.dashStructure}</p>
+                <p><b>Dot-Bracket Notation:</b></p>
+                {nussinovData.dashStructure.length > 150 ?
+                  <div className="full-seq">
+                    <Modal
+                      closeIcon
+                      onClose={() => setModalOpen(false)}
+                      onOpen={() => setModalOpen(true)}
+                      open={modalOpen}
+                      trigger={<Button>View Full Sequence</Button>}
+                      header="Full Dot-Bracket Sequence"
+                      content={nussinovData.dashStructure}
+                    />
+                  </div> : 
+                  <p>{nussinovData.dashStructure}</p>
+                }
                 <p><b>Max Pairings:</b></p>
                 <p>{nussinovData.maxScore}</p>
                 <p><b>Play Animation</b></p>
@@ -246,8 +261,6 @@ function App() {
         </Grid.Column>
 
         <Grid.Column width={13} className="right-column" stretched>
-          <h1 className="header">Interactive Nussinov Visualizer</h1>
-
           {nussinovData && !loading ?
           <>
             <div className="dp-table">

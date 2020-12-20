@@ -1,9 +1,11 @@
 .App {
   text-align: center;
   margin: 0 2rem;
+  max-height: 100vh;
 }
 
-.header:first-child { /* added the :first-child so this takes priority over semantic ui styles */
+.header:first-child {
+  /* added the :first-child so this takes priority over semantic ui styles */
   margin: 1.5rem 0;
   flex: none !important; /* override semantic ui styles for children of stretched columns*/
 }
@@ -28,8 +30,9 @@ p {
 .dp-table {
   margin-left: 2rem;
   width: 75vw;
-  overflow: auto;
+  overflow-x: scroll;
   margin-top: 1rem;
+  max-height: 85vh;
 }
 
 .top-header-cell {
@@ -46,7 +49,7 @@ p {
 .top-header-cell:first-child {
   /* override semantic ui so that sticky headers look better */
   border: none !important;
-  background: white !important; 
+  background: white !important;
   left: 0;
 }
 
@@ -60,4 +63,8 @@ p {
 .sidebar {
   position: sticky;
   top: 2rem;
+}
+
+.full-seq {
+  margin-bottom: 1rem;
 }
