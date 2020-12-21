@@ -204,8 +204,8 @@ function App() {
   return (
     <div className="App">
       <h1 className="header">Interactive Nussinov Visualizer</h1>
-      <Grid>
-        <Grid.Column width={3}>
+      <Grid className="layout-grid">
+        <Grid.Column width={3} className="left-column">
           <div className="sidebar">
             <Form>
               <p><b>RNA Input Sequence</b></p>
@@ -228,7 +228,7 @@ function App() {
             {nussinovData &&
               <Segment>
                 <p><b>Dot-Bracket Notation:</b></p>
-                {nussinovData.dashStructure.length > 150 ?
+                {nussinovData.dashStructure.length > 80 ?
                   <div className="full-seq">
                     <Modal
                       closeIcon

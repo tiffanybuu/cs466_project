@@ -1,13 +1,16 @@
 .App {
   text-align: center;
-  margin: 0 2rem;
-  max-height: 100vh;
 }
 
-.header:first-child {
-  /* added the :first-child so this takes priority over semantic ui styles */
+.header:first-child { /* added the :first-child so this takes priority over semantic ui styles */
   margin: 1.5rem 0;
-  flex: none !important; /* override semantic ui styles for children of stretched columns*/
+  position: absolute;
+  width: 100%;
+}
+
+.ui.grid.layout-grid {
+  margin: 0 2rem;
+  margin-top: 0;
 }
 
 .slider-left {
@@ -22,17 +25,26 @@ p {
   font-size: 15px;
 }
 
+.left-column {
+  padding-top: min(max(0px, calc(100vh - 700px)), 60px) !important;
+  overflow: auto;
+  height: 100vh;
+}
+
+.left-column::-webkit-scrollbar {
+  width: 7px;
+}
+
 .right-column {
   flex: 1;
   height: 100vh;
+  padding-top: 60px !important;
 }
 
 .dp-table {
   margin-left: 2rem;
-  width: 75vw;
-  overflow-x: scroll;
   margin-top: 1rem;
-  max-height: 85vh;
+  overflow: auto;
 }
 
 .top-header-cell {
